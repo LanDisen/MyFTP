@@ -23,6 +23,7 @@ enum ftpmsg_type {
     DEFAULT,
 
     CLIENT_LS, // 客户端请求显示文件列表
+    CLIENT_CD, // 客户端cd命令
     CLIENT_PUT,  // 客户端上传文件
     CLIENT_GET,  // 客户端下载文件
     CLIENT_EXIT, // 客户端退出

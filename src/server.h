@@ -19,6 +19,8 @@ void server_log(char* msg);
 
 int client_ls(int socketFd, char* dir);
 
+int client_cd(int socketFd, char* dit);
+
 int client_get(int socketFd, char* path);
 
 int client_put(int socketFd);

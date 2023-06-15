@@ -20,6 +20,9 @@ void client_log(char* msg);
 // 显示文件列表
 int ls(int socketFd, char* args);
 
+// 目录切换
+int cd(int socketFd, char* args);
+
 // 下载文件
 int get(int socketFd, char* args);
 

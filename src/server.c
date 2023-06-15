@@ -36,6 +36,22 @@ int client_ls(int serverSocketFd, char* dir) {
     return 0;
 }
 
+int client_cd(int socketFd, char* dir) {
+    struct ftpmsg msg;
+    if (chdir(dir) == -1) {
+        perror("cd command error\n");
+        msg.type = FAILURE;
+        send_msg(socketFd, &msg);
+        return -1;
+    }
+    char log[MAX_LENGTH];
+    sprintf(log, "client request cd %s", dir);
+    server_log(log);
+    msg.type = SUCCESS;
+    send_msg(socketFd, &msg);
+    return 0;
+}
+
 int client_get(int socketFd, char* path) {
     return send_file(socketFd, path);
 }
@@ -101,6 +117,8 @@ int start_server() {
             switch (msg.type) {
                 case CLIENT_LS:
                     client_ls(clients[0], msg.data); break;
+                case CLIENT_CD:
+                    client_cd(clients[0], msg.data); break;
                 case CLIENT_GET:
                     client_get(clients[0], msg.data); break;
                 case CLIENT_PUT:

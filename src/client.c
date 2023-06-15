@@ -33,6 +33,29 @@ int ls(int socketFd, char* args) {
     return 0;
 }
 
+int cd(int socketFd, char* args) {
+    if (args == NULL || strcmp(args, "") == 0) {
+        return 0;
+    }
+    char dir[MAX_DIR_LENGTH];
+    get_token(dir, args);
+    struct ftpmsg msg;
+    msg.type = CLIENT_CD;
+    msg.len = strlen(dir) + 1;
+    msg.data = dir;
+    send_msg(socketFd, &msg);
+    recv_msg(socketFd, &msg);
+    if (msg.type == FAILURE) {
+        perror("cd command error\n");
+        return -1;
+    }
+    if (msg.type == SUCCESS) {
+        return 0;
+    }
+    perror("unexpected cd command args\n");
+    return -1;
+}
+
 // 下载文件
 int get(int socketFd, char* args) {
     if (args == NULL) {
@@ -96,16 +119,6 @@ int start_client() {
         return -1;
     }
 
-    // char* msg = "hello\n";
-    // if (send(socketFd, msg, strlen(msg), 0) == -1) {
-    //     client_log("failed to send");
-    //     close(socketFd);
-    //     client_log("closed");
-    //     return -1;
-    // }
-
-    //client_log("send successfully");
-
     // 客户端输入命令
     while (1) {
         printf("MyFTP > ");
@@ -119,12 +132,14 @@ int start_client() {
         if (strcmp(token, "ls") == 0) {
             // 显示文件列表
             ls(socketFd, cmd);
+        } else if (strcmp(token, "cd") == 0) {
+            // 切换目录
+            cd(socketFd, cmd);
         } else if (strcmp(token, "get") == 0) {
             // 下载文件
             get(socketFd, cmd);
         } else if (strcmp(token, "put") == 0) {
             // 上传文件
-            // TODO DUBUG
             put(socketFd, cmd);
         }
     }
