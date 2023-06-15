@@ -23,7 +23,7 @@ int client_cd(int socketFd, char* dit);
 
 int client_get(int socketFd, char* path);
 
-int client_put(int socketFd);
+int client_put(int socketFd, char* newname);
 
 int start_server();
 

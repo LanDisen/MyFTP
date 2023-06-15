@@ -151,7 +151,7 @@ int send_file(int socketFd, char *path) {
     return 0;
 }
 
-int recv_file(int socketFd) {
+int recv_file(int socketFd, char* newname) {
     struct ftpmsg msg;
     char* filename;
     mode_t mode; // 文件模式
@@ -168,7 +168,9 @@ int recv_file(int socketFd) {
 
     recv_msg(socketFd, &msg);
     size = atol(msg.data);
-
+    if (newname != NULL && strcmp(newname, "") != 0) {
+        filename = newname;
+    }
     // 创建文件
     fd = open(filename, O_WRONLY | O_TRUNC | O_CREAT, mode % 01000);
     if (fd == -1) {

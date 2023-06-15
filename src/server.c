@@ -53,11 +53,21 @@ int client_cd(int socketFd, char* dir) {
 }
 
 int client_get(int socketFd, char* path) {
+    char log[MAX_LENGTH];
+    sprintf(log, "client request get file %s", path);
+    server_log(log);
     return send_file(socketFd, path);
 }
 
-int client_put(int socketFd) {
-    return recv_file(socketFd);
+int client_put(int socketFd, char* newname) {
+    char log[MAX_LENGTH];
+    if (newname != NULL) {
+        sprintf(log, "client request get file %s", newname);
+    } else {
+        sprintf(log, "client request get file");
+    }
+    server_log(log);
+    return recv_file(socketFd, newname);
 }
 
 int start_server() {
@@ -122,14 +132,12 @@ int start_server() {
                 case CLIENT_GET:
                     client_get(clients[0], msg.data); break;
                 case CLIENT_PUT:
-                    client_put(clients[0]); break;
+                    client_put(clients[0], msg.data); break;
                 default:
                     break;
             }
             msg.type = DEFAULT;
         }
-
-       
         
     }
     close(serverSocketFd);

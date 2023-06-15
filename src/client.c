@@ -58,22 +58,33 @@ int cd(int socketFd, char* args) {
 
 // 下载文件
 int get(int socketFd, char* args) {
-    if (args == NULL) {
+    if (args == NULL || strcmp(args, "") == 0) {
         perror("\"get\" command needs file path\n");
         return -1;
     }
-    char arg[MAX_LENGTH];
+    char filename[MAX_LENGTH]; // 服务端的文件名
+    char newname[MAX_LENGTH]; // 保存在本机的新文件名
+    strcpy(newname, "");
     struct ftpmsg msg;
-    while (get_token(arg, args) != -1) {
-        //printf("token %s\n", arg);
-        msg.type = CLIENT_GET;
-        msg.len = strlen(arg) + 1;
-        msg.data = arg;
-        // 告诉服务端要下载文件
-        send_msg(socketFd, &msg);
-        // 接收文件数据
-        recv_file(socketFd);
+    get_token(filename, args);
+    if (args != NULL && strcmp(args, "") != 0) {
+        get_token(newname, args);
     }
+    msg.type = CLIENT_GET;
+    msg.len = strlen(filename) + 1;
+    msg.data = filename;
+    send_msg(socketFd, &msg);
+    recv_file(socketFd, newname);
+    // while (get_token(arg, args) != -1) {
+    //     //printf("token %s\n", arg);
+    //     msg.type = CLIENT_GET;
+    //     msg.len = strlen(arg) + 1;
+    //     msg.data = arg;
+    //     // 告诉服务端要下载文件
+    //     send_msg(socketFd, &msg);
+    //     // 接收文件数据
+    //     recv_file(socketFd);
+    // }
     return 0;
 }
 
@@ -83,13 +94,23 @@ int put(int socketFd, char* args) {
         perror("\"put\" command needs file path\n");
         return -1;
     }
-    char arg[MAX_LENGTH];
+    //char arg[MAX_LENGTH];
     struct ftpmsg msg;
     msg.type = CLIENT_PUT;
-    while (get_token(arg, args) != -1) {
-        send_msg(socketFd, &msg);
-        send_file(socketFd, arg);
+    char filename[MAX_LENGTH]; // 本机的文件名
+    char newname[MAX_LENGTH]; // 保存在客户端的新文件名
+    strcpy(newname, "");
+    get_token(filename, args);
+    if ((args != NULL && strcmp(args, "") != 0)) {
+        get_token(newname, args);
     }
+    msg.data = newname;
+    send_msg(socketFd, &msg);
+    send_file(socketFd, filename);
+    // while (get_token(arg, args) != -1) {
+    //     send_msg(socketFd, &msg);
+    //     send_file(socketFd, arg);
+    // }
     return 0;
 }
 

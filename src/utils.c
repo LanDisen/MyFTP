@@ -40,6 +40,7 @@ int get_token(char* token, char* line) {
     }
 
     if (strcmp(line, "") == 0) {
+        token = NULL;
         return -1;
     }
 

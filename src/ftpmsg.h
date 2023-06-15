@@ -47,6 +47,6 @@ struct ftpmsg {
 int send_msg(int socketFd, struct ftpmsg *msg);
 int recv_msg(int socketFd, struct ftpmsg *msg);
 int send_file(int socketFd, char *path);
-int recv_file(int socketFd);
+int recv_file(int socketFd, char* newname);
 
 #endif
