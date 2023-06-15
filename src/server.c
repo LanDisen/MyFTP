@@ -19,12 +19,13 @@ int client_ls(int serverSocketFd, char* dir) {
         send_msg(serverSocketFd, &msg);
     }
     chdir(dir);
+    strcpy(data, "");
     while ((entry = readdir(dir_ptr)) != NULL) {
         // 跳过当前目录和父目录
         if (strcmp(".", entry->d_name) == 0 || strcmp("..", entry->d_name) == 0)
             continue;
         strcat(data, entry->d_name);
-        strcat(data, "\t");
+        strcat(data, "  ");
     }
     msg.type = SUCCESS;
     msg.len = strlen(data) + 1;
