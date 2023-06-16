@@ -133,12 +133,15 @@ int start_server() {
                     client_get(clients[0], msg.data); break;
                 case CLIENT_PUT:
                     client_put(clients[0], msg.data); break;
+                case CLIENT_BYE:
+                    clientNum--;
+                    server_log("a client exit");
+                    break;
                 default:
                     break;
             }
             msg.type = DEFAULT;
         }
-        
     }
     close(serverSocketFd);
     server_log("closed");

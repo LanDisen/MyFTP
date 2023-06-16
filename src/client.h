@@ -29,6 +29,9 @@ int get(int socketFd, char* args);
 // 上传文件
 int put(int socketFd, char* args);
 
+// 退出MyFTP程序
+int bye();
+
 int start_client();
 
 #endif

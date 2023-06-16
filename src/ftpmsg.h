@@ -26,7 +26,7 @@ enum ftpmsg_type {
     CLIENT_CD, // 客户端cd命令
     CLIENT_PUT,  // 客户端上传文件
     CLIENT_GET,  // 客户端下载文件
-    CLIENT_EXIT, // 客户端退出
+    CLIENT_BYE, // 客户端退出
 
     FILE_NAME,
     FILE_MODE, // struct stat的st_mode

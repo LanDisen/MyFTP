@@ -88,6 +88,14 @@ int get(int socketFd, char* args) {
     return 0;
 }
 
+int bye(int socketFd) {
+    struct ftpmsg msg;
+    msg.type = CLIENT_BYE;
+    msg.len = sizeof(msg.type);
+    send_msg(socketFd, &msg);
+    return 0;
+}
+
 // 上传文件
 int put(int socketFd, char* args) {
     if (args == NULL) {
@@ -142,7 +150,7 @@ int start_client() {
 
     // 客户端输入命令
     while (1) {
-        printf("MyFTP > ");
+        printf("MyFTP> ");
         char cmd[MAX_LENGTH];
         input(cmd);
         //fgets(cmd, MAX_LENGTH, stdin);
@@ -162,13 +170,17 @@ int start_client() {
         } else if (strcmp(token, "put") == 0) {
             // 上传文件
             put(socketFd, cmd);
+        } else if (strcmp(token, "bye") == 0) {
+            // 推退出FTP程序
+            bye(socketFd);
+            break;
         }
     }
 
     shutdown(socketFd, SHUT_RDWR);
     close(socketFd);
 
-    client_log("closed");
+    client_log("bye");
     return 0;
 }
 
