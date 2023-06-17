@@ -5,10 +5,59 @@ void client_log(char* msg) {
     printf("%s\n", msg);
 }
 
+// 显示本地文件目录列表
+// TODO DEBUG: 无法显示
+int client_ls(char* args) {
+    char dir[MAX_DIR_LENGTH];
+    get_token(dir, args);
+    printf("dir: %s\n", dir);
+    if (dir == NULL || strcmp(dir, "") == 0) {
+        // dir设置为当前目录
+        strcpy(dir, ".");
+        printf("newdir: %s\n", dir);
+    }
+    DIR* dir_ptr;
+    struct dirent* entry;
+    char data[MAX_LENGTH];
+    if ((dir_ptr = opendir(dir)) == NULL) {
+        // TODO DEBUG: 会输出该error
+        printf("failed to list in client\n");
+        return -1;
+    }
+    chdir(dir);
+    strcpy(data, "");
+    while ((entry = readdir(dir_ptr)) != NULL) {
+        // 跳过当前目录和父目录
+        if (strcmp(".", entry->d_name) == 0 || strcmp("..", entry->d_name) == 0)
+            continue;
+        strcat(data, entry->d_name);
+        strcat(data, "  ");
+    }
+    printf("%s\n", data);
+    closedir(dir_ptr);
+    return 0;
+}
+
+// 切换本地目录
+int client_cd(char* args) {
+    if (args == NULL || strcmp(args, "") == 0) {
+        return 0;
+    }
+    char dir[MAX_DIR_LENGTH];
+    get_token(dir, args);
+    if (chdir(dir) == -1) {
+        perror("client cd command error\n");
+        return -1;
+    }
+    return 0;
+}
+
+// TODO DEBUG: 第二次ls指定的目录会导致服务端崩溃（第一次正常）
+// TODO DEBUG: ls不存在的目录也会导致服务端崩溃
 int ls(int socketFd, char* args) {
     char dir[MAX_DIR_LENGTH];
     get_token(dir, args);
-    if (dir == NULL || strcmp(dir, "")== 0) {
+    if (dir == NULL || strcmp(dir, "") == 0) {
         // dir设置为当前目录
         strcpy(dir, ".");
     }
@@ -17,10 +66,10 @@ int ls(int socketFd, char* args) {
     msg.len = strlen(dir) + 1;
     msg.data = dir;
     send_msg(socketFd, &msg);
-    //printf("send_msg\n");
     recv_msg(socketFd, &msg);
     if (msg.type == SUCCESS) {
         if (strcmp(msg.data, "") != 0) {
+            // 打印服务端文件列表
             printf("%s\n", msg.data);
         }
     } else if (msg.type == FAILURE) {
@@ -147,9 +196,15 @@ int start_client() {
         if (strcmp(token, "ls") == 0) {
             // 显示文件列表
             ls(socketFd, cmd);
+        } else if (strcmp(token, "!ls") == 0) {
+            // 显示本地文件列表
+            client_ls(cmd);
         } else if (strcmp(token, "cd") == 0) {
             // 切换目录
             cd(socketFd, cmd);
+        } else if (strcmp(token, "!cd") == 0) {
+            // 切换本地目录
+            client_cd(cmd);
         } else if (strcmp(token, "get") == 0) {
             // 下载文件
             get(socketFd, cmd);
@@ -160,6 +215,8 @@ int start_client() {
             // 退出FTP程序
             bye(socketFd);
             break;
+        } else {
+            printf("command '%s' not found\n", token);
         }
     }
 

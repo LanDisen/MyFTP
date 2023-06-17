@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <dirent.h>
+#include <fcntl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -16,6 +18,12 @@
 #define PORT 12345
 
 void client_log(char* msg);
+
+// 显示本地文件目录列表
+int client_ls(char* args);
+
+// 切换本地目录
+int client_cd(char* args);
 
 // 显示文件列表
 int ls(int socketFd, char* args);
