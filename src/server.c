@@ -108,6 +108,7 @@ int start_server() {
     int clients[MAX_CLIENT_NUM]; // 多客户端的socketFd
 
     while (1) {
+        // 主线程一直accpet新的客户端连接
         if (clientNum == 0) {
             int clientSocketFd = accept(serverSocketFd, NULL, NULL);
             if (clientSocketFd == -1) {

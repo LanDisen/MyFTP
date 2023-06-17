@@ -30,7 +30,7 @@ int get(int socketFd, char* args);
 int put(int socketFd, char* args);
 
 // 退出MyFTP程序
-int bye();
+int bye(int socketFd);
 
 int start_client();
 

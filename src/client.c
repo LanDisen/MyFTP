@@ -75,16 +75,6 @@ int get(int socketFd, char* args) {
     msg.data = filename;
     send_msg(socketFd, &msg);
     recv_file(socketFd, newname);
-    // while (get_token(arg, args) != -1) {
-    //     //printf("token %s\n", arg);
-    //     msg.type = CLIENT_GET;
-    //     msg.len = strlen(arg) + 1;
-    //     msg.data = arg;
-    //     // 告诉服务端要下载文件
-    //     send_msg(socketFd, &msg);
-    //     // 接收文件数据
-    //     recv_file(socketFd);
-    // }
     return 0;
 }
 
@@ -115,10 +105,6 @@ int put(int socketFd, char* args) {
     msg.data = newname;
     send_msg(socketFd, &msg);
     send_file(socketFd, filename);
-    // while (get_token(arg, args) != -1) {
-    //     send_msg(socketFd, &msg);
-    //     send_file(socketFd, arg);
-    // }
     return 0;
 }
 
@@ -171,7 +157,7 @@ int start_client() {
             // 上传文件
             put(socketFd, cmd);
         } else if (strcmp(token, "bye") == 0) {
-            // 推退出FTP程序
+            // 退出FTP程序
             bye(socketFd);
             break;
         }
