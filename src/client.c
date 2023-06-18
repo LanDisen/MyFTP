@@ -6,21 +6,21 @@ void client_log(char* msg) {
 }
 
 // 显示本地文件目录列表
-// TODO DEBUG: 无法显示
 int client_ls(char* args) {
     char dir[MAX_DIR_LENGTH];
     get_token(dir, args);
-    printf("dir: %s\n", dir);
+    // 可能出现控制字符SOH，ascii对应为1
+    if (strlen(dir) == 1 && dir[0] == 1) {
+        strcpy(dir, "");
+    }
     if (dir == NULL || strcmp(dir, "") == 0) {
         // dir设置为当前目录
         strcpy(dir, ".");
-        printf("newdir: %s\n", dir);
     }
     DIR* dir_ptr;
     struct dirent* entry;
     char data[MAX_LENGTH];
     if ((dir_ptr = opendir(dir)) == NULL) {
-        // TODO DEBUG: 会输出该error
         printf("failed to list in client\n");
         return -1;
     }
@@ -52,8 +52,9 @@ int client_cd(char* args) {
     return 0;
 }
 
-// TODO DEBUG: 第二次ls指定的目录会导致服务端崩溃（第一次正常）
+// TODO DEBUG: 第二次ls指定的目录会导致服务端崩溃（第一次正常），这是因为切换了目录
 // TODO DEBUG: ls不存在的目录也会导致服务端崩溃
+// TODO DEBUG: ls同时进入了对应目录
 int ls(int socketFd, char* args) {
     char dir[MAX_DIR_LENGTH];
     get_token(dir, args);
@@ -188,7 +189,6 @@ int start_client() {
         printf("MyFTP> ");
         char cmd[MAX_LENGTH];
         input(cmd);
-        //fgets(cmd, MAX_LENGTH, stdin);
         char token[MAX_LENGTH];
         get_token(token, cmd);
         if (cmd == NULL) 
@@ -222,8 +222,6 @@ int start_client() {
 
     shutdown(socketFd, SHUT_RDWR);
     close(socketFd);
-
-    client_log("bye");
     return 0;
 }
 
