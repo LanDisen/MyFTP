@@ -5,7 +5,7 @@ void server_log(char* msg) {
     printf("%s\n", msg);
 }
 
-int client_ls(int serverSocketFd, char* dir) {
+int server_ls(int serverSocketFd, char* dir) {
     DIR* dir_ptr;
     struct dirent* entry;
     char data[MAX_LENGTH];
@@ -49,7 +49,7 @@ int client_ls(int serverSocketFd, char* dir) {
     return 0;
 }
 
-int client_cd(int socketFd, char* dir) {
+int server_cd(int socketFd, char* dir) {
     struct ftpmsg msg;
     if (chdir(dir) == -1) {
         perror("cd command error\n");
@@ -65,14 +65,14 @@ int client_cd(int socketFd, char* dir) {
     return 0;
 }
 
-int client_get(int socketFd, char* path) {
+int get(int socketFd, char* path) {
     char log[MAX_LENGTH];
     sprintf(log, "client request get file %s", path);
     server_log(log);
     return send_file(socketFd, path);
 }
 
-int client_put(int socketFd, char* newname) {
+int put(int socketFd, char* newname) {
     char log[MAX_LENGTH];
     if (newname != NULL) {
         sprintf(log, "client request get file %s", newname);
@@ -139,15 +139,15 @@ int start_server() {
         if (clientNum > 0) {
             recv_msg(clients[0], &msg);
             switch (msg.type) {
-                case CLIENT_LS:
-                    client_ls(clients[0], msg.data); break;
-                case CLIENT_CD:
-                    client_cd(clients[0], msg.data); break;
-                case CLIENT_GET:
-                    client_get(clients[0], msg.data); break;
-                case CLIENT_PUT:
-                    client_put(clients[0], msg.data); break;
-                case CLIENT_BYE:
+                case SERVER_LS:
+                    server_ls(clients[0], msg.data); break;
+                case SERVER_CD:
+                    server_cd(clients[0], msg.data); break;
+                case GET:
+                    get(clients[0], msg.data); break;
+                case PUT:
+                    put(clients[0], msg.data); break;
+                case BYE:
                     clientNum--;
                     server_log("a client exit");
                     break;

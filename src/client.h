@@ -26,10 +26,10 @@ int client_ls(char* args);
 int client_cd(char* args);
 
 // 显示文件列表
-int ls(int socketFd, char* args);
+int server_ls(int socketFd, char* args);
 
 // 目录切换
-int cd(int socketFd, char* args);
+int server_cd(int socketFd, char* args);
 
 // 下载文件
 int get(int socketFd, char* args);

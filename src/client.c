@@ -8,11 +8,8 @@ void client_log(char* msg) {
 // 显示本地文件目录列表
 int client_ls(char* args) {
     char dir[MAX_DIR_LENGTH];
+    strcpy(dir, "");
     get_token(dir, args);
-    // 可能出现控制字符SOH，ascii对应为1
-    if (strlen(dir) == 1 && dir[0] == 1) {
-        strcpy(dir, "");
-    }
     char* cwd;
     if (dir == NULL || strcmp(dir, "") == 0) {
         // dir设置为当前目录
@@ -66,7 +63,7 @@ int client_cd(char* args) {
     return 0;
 }
 
-int ls(int socketFd, char* args) {
+int server_ls(int socketFd, char* args) {
     char dir[MAX_DIR_LENGTH];
     get_token(dir, args);
     if (dir == NULL || strcmp(dir, "") == 0) {
@@ -74,7 +71,7 @@ int ls(int socketFd, char* args) {
         strcpy(dir, ".");
     }
     struct ftpmsg msg;
-    msg.type = CLIENT_LS;
+    msg.type = SERVER_LS;
     msg.len = strlen(dir) + 1;
     msg.data = dir;
     send_msg(socketFd, &msg);
@@ -94,14 +91,14 @@ int ls(int socketFd, char* args) {
     return 0;
 }
 
-int cd(int socketFd, char* args) {
+int server_cd(int socketFd, char* args) {
     if (args == NULL || strcmp(args, "") == 0) {
         return 0;
     }
     char dir[MAX_DIR_LENGTH];
     get_token(dir, args);
     struct ftpmsg msg;
-    msg.type = CLIENT_CD;
+    msg.type = SERVER_CD;
     msg.len = strlen(dir) + 1;
     msg.data = dir;
     send_msg(socketFd, &msg);
@@ -131,7 +128,7 @@ int get(int socketFd, char* args) {
     if (args != NULL && strcmp(args, "") != 0) {
         get_token(newname, args);
     }
-    msg.type = CLIENT_GET;
+    msg.type = GET;
     msg.len = strlen(filename) + 1;
     msg.data = filename;
     send_msg(socketFd, &msg);
@@ -141,7 +138,7 @@ int get(int socketFd, char* args) {
 
 int bye(int socketFd) {
     struct ftpmsg msg;
-    msg.type = CLIENT_BYE;
+    msg.type = BYE;
     msg.len = sizeof(msg.type);
     send_msg(socketFd, &msg);
     return 0;
@@ -155,7 +152,7 @@ int put(int socketFd, char* args) {
     }
     //char arg[MAX_LENGTH];
     struct ftpmsg msg;
-    msg.type = CLIENT_PUT;
+    msg.type = PUT;
     char filename[MAX_LENGTH]; // 本机的文件名
     char newname[MAX_LENGTH]; // 保存在客户端的新文件名
     strcpy(newname, "");
@@ -201,18 +198,19 @@ int start_client() {
         char cmd[MAX_LENGTH];
         input(cmd);
         char token[MAX_LENGTH];
+        strcpy(token, "");
         get_token(token, cmd);
-        if (cmd == NULL) 
+        if (token == NULL || strcmp(token, "") == 0) 
             continue;
         if (strcmp(token, "ls") == 0) {
-            // 显示文件列表
-            ls(socketFd, cmd);
+            // 显示服务端文件列表
+            server_ls(socketFd, cmd);
         } else if (strcmp(token, "!ls") == 0) {
             // 显示本地文件列表
             client_ls(cmd);
         } else if (strcmp(token, "cd") == 0) {
-            // 切换目录
-            cd(socketFd, cmd);
+            // 切换服务端目录
+            server_cd(socketFd, cmd);
         } else if (strcmp(token, "!cd") == 0) {
             // 切换本地目录
             client_cd(cmd);
@@ -229,6 +227,8 @@ int start_client() {
         } else {
             printf("command '%s' not found\n", token);
         }
+        strcpy(cmd, "");
+        strcpy(token, "");
     }
 
     shutdown(socketFd, SHUT_RDWR);

@@ -18,13 +18,13 @@
 
 void server_log(char* msg);
 
-int client_ls(int socketFd, char* dir);
+int server_ls(int socketFd, char* dir);
 
-int client_cd(int socketFd, char* dir);
+int server_cd(int socketFd, char* dir);
 
-int client_get(int socketFd, char* path);
+int get(int socketFd, char* path);
 
-int client_put(int socketFd, char* newname);
+int put(int socketFd, char* newname);
 
 int start_server();
 
