@@ -13,9 +13,15 @@ int client_ls(char* args) {
     if (strlen(dir) == 1 && dir[0] == 1) {
         strcpy(dir, "");
     }
+    char* cwd;
     if (dir == NULL || strcmp(dir, "") == 0) {
         // dir设置为当前目录
         strcpy(dir, ".");
+    }
+    // 保存当前工作路径
+    if ((cwd = getcwd(NULL, 0)) == NULL) {
+        perror("getcwd error\n");
+        return -1;
     }
     DIR* dir_ptr;
     struct dirent* entry;
@@ -25,7 +31,7 @@ int client_ls(char* args) {
         return -1;
     }
     if (chdir(dir) == -1) {
-        perror("client ls command error\n");
+        printf("%s: No such file or directory\n", dir);
         return -1;
     }
     strcpy(data, "");
@@ -37,6 +43,11 @@ int client_ls(char* args) {
         strcat(data, "  ");
     }
     printf("%s\n", data);
+    // 切换回原工作目录
+    if (cwd != NULL && chdir(cwd) == -1) {
+        printf("client cd cwd error\n");
+        return -1;
+    }
     closedir(dir_ptr);
     return 0;
 }
@@ -55,8 +66,6 @@ int client_cd(char* args) {
     return 0;
 }
 
-// TODO DEBUG: 第二次ls指定的目录会导致服务端崩溃（第一次正常），这是因为切换了目录
-// TODO DEBUG: ls同时进入了对应目录
 int ls(int socketFd, char* args) {
     char dir[MAX_DIR_LENGTH];
     get_token(dir, args);

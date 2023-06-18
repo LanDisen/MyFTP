@@ -10,13 +10,18 @@ int client_ls(int serverSocketFd, char* dir) {
     struct dirent* entry;
     char data[MAX_LENGTH];
     struct ftpmsg msg;
-    
+    char *cwd;
     if ((dir_ptr = opendir(dir)) == NULL) {
         printf("failed to list");
         msg.type = FAILURE;
         msg.len = 0;
         msg.data = NULL;
         send_msg(serverSocketFd, &msg);
+    }
+    // 保存当前工作路径
+    if ((cwd = getcwd(NULL, 0)) == NULL) {
+        perror("getcwd error\n");
+        return -1;
     }
     if (chdir(dir) == -1) {
         printf("%s: No such file or directory\n", dir);
@@ -34,6 +39,11 @@ int client_ls(int serverSocketFd, char* dir) {
     msg.len = strlen(data) + 1;
     msg.data = data;
     send_msg(serverSocketFd, &msg);
+    // 切换回原工作目录
+    if (cwd != NULL && chdir(cwd) == -1) {
+        printf("cd cwd error\n");
+        return -1;
+    }
     server_log("list successfully");
     closedir(dir_ptr);
     return 0;
