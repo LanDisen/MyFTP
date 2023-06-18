@@ -17,7 +17,7 @@ int client_ls(char* args) {
     }
     // 保存当前工作路径
     if ((cwd = getcwd(NULL, 0)) == NULL) {
-        perror("getcwd error\n");
+        printf("getcwd error\n");
         return -1;
     }
     DIR* dir_ptr;
@@ -42,7 +42,7 @@ int client_ls(char* args) {
     printf("%s\n", data);
     // 切换回原工作目录
     if (cwd != NULL && chdir(cwd) == -1) {
-        printf("client cd cwd error\n");
+        printf("change current working directory error\n");
         return -1;
     }
     closedir(dir_ptr);
@@ -57,7 +57,7 @@ int client_cd(char* args) {
     char dir[MAX_DIR_LENGTH];
     get_token(dir, args);
     if (chdir(dir) == -1) {
-        perror("client cd command error\n");
+        printf("%s: No such file or directory\n", dir);
         return -1;
     }
     return 0;
@@ -85,7 +85,7 @@ int server_ls(int socketFd, char* args) {
         printf("%s: No such file or directory\n", dir);
         return -1;
     } else {
-        printf("wrong message type\n");
+        printf("wrong ftp message type\n");
         return -1;
     }
     return 0;
@@ -104,7 +104,7 @@ int server_cd(int socketFd, char* args) {
     send_msg(socketFd, &msg);
     recv_msg(socketFd, &msg);
     if (msg.type == FAILURE) {
-        perror("cd command error\n");
+        printf("%s: No such file or directory\n", dir);
         return -1;
     }
     if (msg.type == SUCCESS) {
@@ -147,7 +147,7 @@ int bye(int socketFd) {
 // 上传文件
 int put(int socketFd, char* args) {
     if (args == NULL) {
-        perror("\"put\" command needs file path\n");
+        printf("\"put\" command needs a exact file\n");
         return -1;
     }
     //char arg[MAX_LENGTH];
@@ -171,7 +171,7 @@ int start_client() {
     int socketFd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 
     if (socketFd == -1) {
-        client_log("failed to create socket");
+        client_log("failed to create client socket");
         return -1;
     }
 
