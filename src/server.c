@@ -83,10 +83,39 @@ int put(int socketFd, char* newname) {
     return recv_file(socketFd, newname);
 }
 
+// 线程函数，开启一个新的线程服务客户端
+void* serve(void* args) {
+    int clientSocketFd = *((int*)args);
+    while (1) {
+        struct ftpmsg msg;
+        recv_msg(clientSocketFd, &msg);
+        switch (msg.type) {
+            case SERVER_LS:
+                server_ls(clientSocketFd, msg.data); break;
+            case SERVER_CD:
+                server_cd(clientSocketFd, msg.data); break;
+            case GET:
+                get(clientSocketFd, msg.data); break;
+            case PUT:
+                put(clientSocketFd, msg.data); break;
+            case BYE: {
+                char log[MAX_LENGTH];
+                sprintf(log, "a client %d exit", clientSocketFd);
+                server_log(log);
+                break;
+            }
+            default:
+                printf("wrong msg type\n");
+                break;
+        }
+        msg.type = DEFAULT;
+    }
+    pthread_exit(0);
+}
+
 int start_server() {
     struct sockaddr_in serverSocketAddr;
     int serverSocketFd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-    //char buf[BUFFER_SIZE];
 
     if (serverSocketFd == -1) {
         server_log("failed to create socket");
@@ -115,46 +144,24 @@ int start_server() {
 
     server_log("started");
 
-    int clientNum = 0;
-    struct ftpmsg msg;
-    //char cmd[MAX_CMD_LENGTH];
-    int clients[MAX_CLIENT_NUM]; // 多客户端的socketFd
-
     while (1) {
-        // 主线程一直accpet新的客户端连接
-        if (clientNum == 0) {
-            int clientSocketFd = accept(serverSocketFd, NULL, NULL);
-            if (clientSocketFd == -1) {
-                perror("failed to accpet\n");
-                close(serverSocketFd);
-                server_log("closed");
+        // 主线程等待新的客户端连接
+        int clientSocketFd = accept(serverSocketFd, NULL, NULL);
+        if (clientSocketFd == -1) {
+            perror("failed to accpet\n");
+            close(serverSocketFd);
+            server_log("closed");
+            return -1;
+        } else {
+            // 有新的客户端连接到服务器，创建子线程进行服务
+            pthread_t clientThread;
+            if (pthread_create(&clientThread, NULL, serve, &clientSocketFd) != 0) {
+                printf("thread creation failed\n");
                 return -1;
-            } else {
-                clients[clientNum++] = clientSocketFd;
-                server_log("a client joined");
             }
-        }
-
-        // TODO 暂时只实现了单客户端，后续实现多客户端连接
-        if (clientNum > 0) {
-            recv_msg(clients[0], &msg);
-            switch (msg.type) {
-                case SERVER_LS:
-                    server_ls(clients[0], msg.data); break;
-                case SERVER_CD:
-                    server_cd(clients[0], msg.data); break;
-                case GET:
-                    get(clients[0], msg.data); break;
-                case PUT:
-                    put(clients[0], msg.data); break;
-                case BYE:
-                    clientNum--;
-                    server_log("a client exit");
-                    break;
-                default:
-                    break;
-            }
-            msg.type = DEFAULT;
+            char log[MAX_LENGTH];
+            sprintf(log, "a client %d joined", clientSocketFd);
+            server_log(log);
         }
     }
     close(serverSocketFd);
