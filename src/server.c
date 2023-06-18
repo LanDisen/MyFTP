@@ -18,7 +18,10 @@ int client_ls(int serverSocketFd, char* dir) {
         msg.data = NULL;
         send_msg(serverSocketFd, &msg);
     }
-    chdir(dir);
+    if (chdir(dir) == -1) {
+        printf("%s: No such file or directory\n", dir);
+        return -1;
+    }
     strcpy(data, "");
     while ((entry = readdir(dir_ptr)) != NULL) {
         // 跳过当前目录和父目录

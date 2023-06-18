@@ -24,7 +24,10 @@ int client_ls(char* args) {
         printf("failed to list in client\n");
         return -1;
     }
-    chdir(dir);
+    if (chdir(dir) == -1) {
+        perror("client ls command error\n");
+        return -1;
+    }
     strcpy(data, "");
     while ((entry = readdir(dir_ptr)) != NULL) {
         // 跳过当前目录和父目录
@@ -53,7 +56,6 @@ int client_cd(char* args) {
 }
 
 // TODO DEBUG: 第二次ls指定的目录会导致服务端崩溃（第一次正常），这是因为切换了目录
-// TODO DEBUG: ls不存在的目录也会导致服务端崩溃
 // TODO DEBUG: ls同时进入了对应目录
 int ls(int socketFd, char* args) {
     char dir[MAX_DIR_LENGTH];
@@ -74,7 +76,7 @@ int ls(int socketFd, char* args) {
             printf("%s\n", msg.data);
         }
     } else if (msg.type == FAILURE) {
-        printf("failed to list\n");
+        printf("%s: No such file or directory\n", dir);
         return -1;
     } else {
         printf("wrong message type\n");
