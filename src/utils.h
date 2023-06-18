@@ -8,8 +8,10 @@
 
 int input(char* str);
 
-// 第一个空格前的字符串会传递到token，cmd删去该部分字符串
-int get_token(char* token, char* cmd);
+int rm_spaces(char* str);
+
+// 第一个空格前的字符串会传递到token，str删去该部分字符串
+int get_token(char* token, char* str);
 
 // 从文件路径中截取文件名
 char* get_filename(char* filename, const char* path);

@@ -10,67 +10,33 @@ int input(char* str) {
     return 0;
 }
 
-// int get_token(char* token, char* cmd) {
-//     // 去除cmd开头的空格
-//     while (*cmd == ' ') {
-//         strcpy(cmd, cmd + 1);
-//     }
-//     int i = 0;
-//     while (*cmd != ' ' && *cmd != '\0') {
-//         *token++ = *cmd;
-//         i++;
-//         strcpy(cmd, cmd + 1);
-//     }
-//     *token++ = '\0';
-//     if (i == 0) {
-//         return -1;
-//     }
-//     while (*cmd == ' ') {
-//         strcpy(cmd, cmd + 1);
-//     }
-//     return 0;
-// }
-
-int get_token(char* token, char* line) {
-    int i = 0;
-    
-    // 清除前导空格
-    while (isspace(line[i])) {
-        i++;
-    }
-
-    if (strcmp(line, "") == 0) {
-        token = NULL;
-        return -1;
-    }
-
-    if (strchr(line, ' ') == NULL) {
-        strcpy(token, line);
-        strcpy(line, "");
+int rm_spaces(char* str) {
+    if (str == NULL || strcmp(str, "")) {
         return 0;
     }
-    
-    // 复制单词到token
-    int j = 0;
-    while (line[i] != '\0' && !isspace(line[i])) {
-        token[j] = line[i];
-        i++;
-        j++;
+    while (str[0] == ' ') {
+        strcpy(str, str + 1);
     }
-    token[j] = '\0';
-    
-    // 截取line中第一个空格之后的内容
-    if (line[i] != '\0') {
-        i++;  // 跳过第一个空格
-        int k = 0;
-        while (line[i] != '\0') {
-            line[k] = line[i];
-            i++;
-            k++;
-        }
-        line[k] = '\0';
+    return 0;
+}
+
+int get_token(char* token, char* str) {
+    rm_spaces(str);
+    if (str == NULL || strcmp(str, "") == 0) {
+        return 0;
     }
-    
+    int i = 0;
+    while (str[i] != '\0' && str[i] != ' ') {
+        i += 1;
+    }
+    if (str[i] == '\0') {
+        strcpy(token, str);
+        strcpy(str, "\0");
+        return 0;
+    }
+    strncpy(token, str, i);
+    strcpy(str, str + i + 1);
+    rm_spaces(str);
     return 0;
 }
 
