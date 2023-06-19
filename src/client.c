@@ -220,7 +220,9 @@ int start_client() {
         } else if (strcmp(token, "put") == 0) {
             // 上传文件
             put(socketFd, cmd);
-        } else if (strcmp(token, "bye") == 0 || strcmp(token, "exit") == 0) {
+        } else if (strcmp(token, "bye") == 0 || 
+                   strcmp(token, "exit") == 0 ||
+                   strcmp(token, "quit") == 0) {
             // 退出FTP程序
             bye(socketFd);
             break;

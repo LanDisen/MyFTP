@@ -35,6 +35,7 @@ int get_token(char* token, char* str) {
         return 0;
     }
     strncpy(token, str, i);
+    token[i] = '\0';
     strcpy(str, str + i + 1);
     rm_spaces(str);
     return 0;

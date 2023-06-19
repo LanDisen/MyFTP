@@ -21,21 +21,18 @@
 
 enum ftpmsg_type {
     DEFAULT,
-
     SERVER_LS, // 请求服务端显示文件列表
     SERVER_CD, // 请求服务端切换目录
-    PUT,  // 上传文件
-    GET,  // 下载文件
+    PUT, // 上传文件
+    GET, // 下载文件
     BYE, // 客户端退出
-
-    FILE_NAME,
+    FILE_NAME, // 文件名
     FILE_MODE, // struct stat的st_mode
-    FILE_SIZE,
-    FILE_DATA,
-    FILE_OVER,
-
-    SUCCESS,
-    FAILURE
+    FILE_SIZE, // 文件大小
+    FILE_DATA, // 文件数据
+    FILE_OVER, // 文件传输完毕
+    SUCCESS, // 消息成功接收
+    FAILURE  // 消息成功接收
 };
 
 struct ftpmsg {
